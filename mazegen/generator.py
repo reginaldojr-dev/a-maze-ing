@@ -10,7 +10,7 @@ ALGORITHMS: Dict[str, Type[MazeAlgorithm]] = {}
 
 
 def register_algorithm(name: str, algo_cls: Type[MazeAlgorithm]) -> None:
-    """Permite registrar dinamicamente algoritmos para extensibilidade."""
+    """Allows you to dynamically register algorithms for modularity."""
     ALGORITHMS[name.lower()] = algo_cls
 
 
@@ -43,5 +43,5 @@ class MazeGenerator:
     def get_solution(self, maze: Maze) -> List[str]:
         path = solve_bfs(maze, self.config.entry, self.config.exit)
         if not path:
-            raise PathNotFoundError("Impos alca EXIT apat de ENTRY.")
+            raise PathNotFoundError("Impossible to achieveEXIT From ENTRY.")
         return path

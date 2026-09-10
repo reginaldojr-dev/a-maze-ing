@@ -37,7 +37,7 @@ class FallbackAlgorithm(MazeAlgorithm):
 
 
 class FallbackRenderer(BaseRenderer):
-    """Exibe o labirinto em formato hexadecimal simples no terminal."""
+    """Displays the maze in simple hexadecimal format in the terminal."""
     def render(self, maze: Maze, path: Optional[List[str]] = None) -> None:
         print("\n--- [RENDERER FALLBACK - MATRIZ HEX] ---")
         for line in maze.export_hex_format():
