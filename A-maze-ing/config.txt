@@ -1,0 +1,10 @@
+WIDTH=20
+HEIGHT=10
+ENTRY=0,0
+EXIT=19,9
+OUTPUT_FILE=maze_output.hex
+PERFECT=true
+SEED=42
+ALGORITHM=backtracker
+DISPLAY=ascii
+NO_DEAD_ENDS=false
