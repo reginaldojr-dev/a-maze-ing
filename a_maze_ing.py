@@ -12,10 +12,6 @@ from mazegen.maze import Maze
 from mazegen.walls import Wall
 
 
-# =====================================================================
-# FALLBACKS LOCAIS (Para testar o projeto de forma autonoma)
-# =====================================================================
-
 class FallbackAlgorithm(MazeAlgorithm):
     def generate(
         self,
@@ -48,15 +44,11 @@ class FallbackRenderer(BaseRenderer):
             print(line)
         if path:
             print(
-                f"\nCaminho Solucao ({len(path)} passos): "
+                f"\nPath Solution ({len(path)} pass): "
                 f"{' -> '.join(path)}",
             )
         print("-----------------------------------------\n")
 
-
-# =====================================================================
-# REGISTRO DE MODULOS (modulos do regi pluga as implementacoes aqui)
-# =====================================================================
 
 ALGORITHMS: Dict[str, Type[MazeAlgorithm]] = {
     "backtracker": FallbackAlgorithm,
@@ -70,10 +62,9 @@ RENDERERS: Dict[str, Type[BaseRenderer]] = {
 }
 
 
-# Tenta carregar as implementacoes reais do regi se ja existirem
 try:
-    from mazegen.algorithms.backtracker import BacktrackerAlgorithm
-    ALGORITHMS["backtracker"] = BacktrackerAlgorithm
+    from mazegen.algorithms.backtracker import RecursiveBacktracker
+    ALGORITHMS["backtracker"] = RecursiveBacktracker
 except ImportError:
     pass
 
@@ -102,10 +93,6 @@ except ImportError:
     pass
 
 
-# =====================================================================
-# ENTRY POINT
-# =====================================================================
-
 def main() -> None:
     if len(sys.argv) != 2:
         print(
@@ -117,32 +104,26 @@ def main() -> None:
     config_path = sys.argv[1]
 
     try:
-        """1. Configuration File Parsing"""
         config = MazeConfig.from_file(config_path)
 
-        """2. Dynamic Algorithm Resolution"""
         algo_cls = ALGORITHMS.get(config.algorithm)
         if not algo_cls:
-            raise ConfigError(f"Algorit '{config.algorithm}' no suport.")
+            raise ConfigError(f"Algoritm '{config.algorithm}' no suport.")
         algorithm = algo_cls()
 
-        """3. Labyrinth Generation"""
         generator = MazeGenerator(config)
         maze = generator.create_maze(algorithm)
 
-        """4. Solution of maze (BFS)"""
         solution_path = generator.get_solution(maze)
 
-        """5. Export of Hexadecimal Array to File"""
         hex_data = maze.export_hex_format()
         with open(config.output_file, "w", encoding="utf-8") as f:
             for line in hex_data:
                 f.write(line + "\n")
 
-        """6. Visual Rendering"""
         renderer_cls = RENDERERS.get(config.display)
         if not renderer_cls:
-            raise ConfigError(f"Show'{config.display}' no suport.")
+            raise ConfigError(f"Show '{config.display}' no suport.")
         renderer = renderer_cls()
         renderer.render(maze, solution_path)
 

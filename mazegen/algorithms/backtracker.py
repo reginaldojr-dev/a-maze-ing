@@ -1,17 +1,17 @@
-from typing import Generator, Tuple
 import random
+from typing import Generator, Tuple
 
-from mazegen.maze import Maze
 from mazegen.algorithms.base import MazeAlgorithm
+from mazegen.maze import Maze
 
 
 class RecursiveBacktracker(MazeAlgorithm):
     def generate(
-            self,
-            maze: Maze,
-            rng: random.Random,
-            start_pos: Tuple[int, int]
-            ) -> Generator[Maze, None, None]:
+        self,
+        maze: Maze,
+        rng: random.Random,
+        start_pos: Tuple[int, int],
+    ) -> Generator[Maze, None, None]:
         stack = [start_pos]
         visited = {start_pos}
 
@@ -22,9 +22,12 @@ class RecursiveBacktracker(MazeAlgorithm):
             neighbors = []
 
             for direction, (nx, ny) in maze.get_neighbor_coords(
-                    current_x, current_y):
-                if (nx, ny) not in visited and not maze.cell_at(
-                        nx, ny).is_blocked:
+                current_x, current_y
+            ):
+                if (
+                    (nx, ny) not in visited
+                    and not maze.cell_at(nx, ny).is_blocked
+                ):
                     neighbors.append((direction, (nx, ny)))
 
             if not neighbors:
