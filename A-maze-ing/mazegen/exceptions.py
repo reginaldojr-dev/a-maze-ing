@@ -1,15 +1,14 @@
 class MazeError(Exception):
-	pass
+    pass
 
 
 class ConfigError(MazeError):
-	pass
+    pass
 
 
 class GenerationError(MazeError):
-	pass
+    pass
 
 
 class PathNotFoundError(MazeError):
-	pass
-	
+    pass
