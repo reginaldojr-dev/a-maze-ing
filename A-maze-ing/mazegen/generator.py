@@ -30,14 +30,12 @@ class MazeGenerator:
         if not self.config.perfect:
             maze.ensure_pacman_intersections()
             maze.add_random_loops(self.rng, extra_passages=max(2, (maze.width * maze.height) // 20))
-
         if self.config.no_dead_ends:
             maze.braid(self.rng)
-
         return maze
 
     def get_solution(self, maze: Maze) -> List[str]:
         path = solve_bfs(maze, self.config.entry, self.config.exit)
         if not path:
-            raise PathNotFoundError("Impossível alcançar EXIT a partir de ENTRY.")
+            raise PathNotFoundError("Impossivel alcancar EXIT a partir de ENTRY.")
         return path

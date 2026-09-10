@@ -30,9 +30,7 @@ class Maze:
             dx = 1
         elif direction == Wall.WEST:
             dx = -1
-
         nx, ny = x + dx, y + dy
-
         if self.is_valid_coord(nx, ny):
             self.cell_at(x, y).remove_wall(direction)
             self.cell_at(nx, ny).remove_wall(direction.opposite)
@@ -59,10 +57,8 @@ class Maze:
         pw, ph = 10, 5
         if self.width < pw + 4 or self.height < ph + 4:
             return
-
         start_x = (self.width - pw) // 2
         start_y = (self.height - ph) // 2
-
         for row_idx, row_str in enumerate(pattern):
             for col_idx, char in enumerate(row_str):
                 if char == "1":
@@ -93,7 +89,6 @@ class Maze:
             cell = self.cell_at(rx, ry)
             if cell.is_blocked:
                 continue
-
             valid_neighbors = [
                 (d, coords) for d, coords in self.get_neighbor_coords(rx, ry)
                 if not self.cell_at(coords[0], coords[1]).is_blocked
