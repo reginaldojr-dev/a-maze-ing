@@ -12,7 +12,7 @@ from mazegen.walls import Wall
 
 
 # =====================================================================
-# FALLBACKS LOCAIS (Para testar o projeto de forma autônoma)
+# FALLBACKS LOCAIS (Para testar o projeto de forma autonoma)
 # =====================================================================
 
 class FallbackAlgorithm(MazeAlgorithm):
@@ -35,12 +35,12 @@ class FallbackRenderer(BaseRenderer):
         for line in maze.export_hex_format():
             print(line)
         if path:
-            print(f"\nCaminho Solução ({len(path)} passos): {' -> '.join(path)}")
+            print(f"\nCaminho Solucao ({len(path)} passos): {' -> '.join(path)}")
         print("-----------------------------------------\n")
 
 
 # =====================================================================
-# REGISTRO DE MÓDULOS (modulos do regi pluga as implementações aqui)
+# REGISTRO DE MODULOS (modulos do regi pluga as implementacoes aqui)
 # =====================================================================
 
 ALGORITHMS: Dict[str, Type[MazeAlgorithm]] = {
