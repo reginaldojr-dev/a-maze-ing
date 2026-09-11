@@ -24,7 +24,8 @@ class MazeGenerator:
                     self.config.width,
                     self.config.height,
                     self.config.entry,
-                    self.config.exit)
+                    self.config.exit
+                )
         maze.apply_42_pattern()
 
         gen = algorithm.generate(maze, self.rng, self.config.entry)

@@ -108,7 +108,9 @@ def main() -> None:
 
         algo_cls = ALGORITHMS.get(config.algorithm)
         if not algo_cls:
-            raise ConfigError(f"Algoritm '{config.algorithm}' no suport.")
+            raise ConfigError(
+                f"Algoritm '{config.algorithm}' no suport."
+            )
         algorithm = algo_cls()
 
         generator = MazeGenerator(config)
@@ -123,7 +125,9 @@ def main() -> None:
 
         renderer_cls = RENDERERS.get(config.display)
         if not renderer_cls:
-            raise ConfigError(f"Show '{config.display}' no suport.")
+            raise ConfigError(
+                f"Display '{config.display}' no suport."
+            )
         renderer = renderer_cls()
 
         def regenerate() -> tuple[Maze, List[str]]:

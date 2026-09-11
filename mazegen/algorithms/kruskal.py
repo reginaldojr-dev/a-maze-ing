@@ -1,17 +1,17 @@
-from typing import Generator, Tuple
 import random
+from typing import Dict, Generator, List, Tuple
 
-from mazegen.walls import Wall
-from mazegen.maze import Maze
 from mazegen.algorithms.base import MazeAlgorithm
+from mazegen.maze import Maze
+from mazegen.walls import Wall
 
 
 class DisjointSet:
     def __init__(
         self,
-        cells: list[Tuple[int, int]]
+        cells: List[Tuple[int, int]]
     ) -> None:
-        self.parent: dict[
+        self.parent: Dict[
             Tuple[int, int],
             Tuple[int, int]
         ] = {
@@ -56,8 +56,8 @@ class KruskalAlgorithm(MazeAlgorithm):
 
         sets = DisjointSet(cells)
 
-        edges: list[
-            tuple[
+        edges: List[
+            Tuple[
                 Tuple[int, int],
                 Tuple[int, int],
                 Wall
@@ -86,3 +86,4 @@ class KruskalAlgorithm(MazeAlgorithm):
             sets.union(first, second)
 
             yield maze
+        yield maze

@@ -5,7 +5,7 @@ class Cell:
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
-        self. walls = Wall.ALL
+        self.walls = Wall.ALL
         self.is_blocked = False
 
     def remove_wall(self, wall: Wall) -> None:
