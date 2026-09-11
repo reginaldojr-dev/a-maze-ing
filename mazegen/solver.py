@@ -4,7 +4,11 @@ from mazegen.maze import Maze
 from mazegen.walls import Wall
 
 
-def solve_bfs(maze: Maze, start: Tuple[int, int], end: Tuple[int, int]) -> List[str]:
+def solve_bfs(
+    maze: Maze,
+    start: Tuple[int, int],
+    end: Tuple[int, int],
+) -> List[str]:
     queue = deque([start])
     visited = {start}
     parent: Dict[Tuple[int, int], Tuple[Tuple[int, int], str]] = {}

@@ -5,7 +5,13 @@ import random
 
 
 class Maze:
-    def __init__(self, width: int, height: int, entry: Tuple[int, int], exit: Tuple[int, int]):
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        entry: Tuple[int, int],
+        exit: Tuple[int, int]
+    ):
         self.width = width
         self.height = height
         self.entry = entry
@@ -35,7 +41,11 @@ class Maze:
             self.cell_at(x, y).remove_wall(direction)
             self.cell_at(nx, ny).remove_wall(direction.opposite)
 
-    def get_neighbor_coords(self, x: int, y: int) -> Generator[Tuple[Wall, Tuple[int, int]], None, None]:
+    def get_neighbor_coords(
+        self,
+        x: int,
+        y: int
+    ) -> Generator[Tuple[Wall, Tuple[int, int]], None, None]:
         directions = [
             (Wall.NORTH, (x, y - 1)),
             (Wall.EAST, (x + 1, y)),
@@ -55,10 +65,14 @@ class Maze:
             "0000101111"
         ]
         pw, ph = 10, 5
+
         if self.width < pw + 4 or self.height < ph + 4:
             return
-        start_x = (self.width - pw) // 2
-        start_y = (self.height - ph) // 2
+
+        pad_x = self.width - pw
+        pad_y = self.height - ph
+        start_x = (pad_x // 2) + (pad_x % 2)
+        start_y = (pad_y // 2) + (pad_y % 2)
         for row_idx, row_str in enumerate(pattern):
             for col_idx, char in enumerate(row_str):
                 if char == "1":
@@ -77,7 +91,11 @@ class Maze:
                     cell.remove_wall(Wall.EAST)
                     cell.remove_wall(Wall.WEST)
 
-    def add_random_loops(self, rng: random.Random, extra_passages: int) -> None:
+    def add_random_loops(
+        self,
+        rng: random.Random,
+        extra_passages: int
+    ) -> None:
         count = 0
         attempts = 0
         max_attempts = 100
@@ -107,13 +125,23 @@ class Maze:
                     continue
                 if cell.wall_count() == 3:
                     dead_end_walls = [
-                        d for d in [Wall.NORTH, Wall.EAST, Wall.SOUTH, Wall.WEST]
+                        d for d in [
+                            Wall.NORTH,
+                            Wall.EAST,
+                            Wall.SOUTH,
+                            Wall.WEST
+                        ]
                         if cell.has_wall(d)
                     ]
                     rng.shuffle(dead_end_walls)
                     for d in dead_end_walls:
-                        for check_d, (nx, ny) in self.get_neighbor_coords(x, y):
-                            if check_d == d and not self.cell_at(nx, ny).is_blocked:
+                        for check_d, (nx, ny) in self.get_neighbor_coords(
+                            x, y
+                        ):
+                            if (
+                                check_d == d
+                                and not self.cell_at(nx, ny).is_blocked
+                            ):
                                 self.open_passage(x, y, d)
                                 break
                         if cell.wall_count() < 3:

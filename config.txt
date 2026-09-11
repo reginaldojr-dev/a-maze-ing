@@ -5,6 +5,6 @@ EXIT=19,9
 OUTPUT_FILE=maze_output.hex
 PERFECT=true
 SEED=42
-ALGORITHM=backtracker
+ALGORITHM=prim, backtracker,
 DISPLAY=ascii
 NO_DEAD_ENDS=false
