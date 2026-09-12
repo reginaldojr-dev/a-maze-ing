@@ -1,7 +1,7 @@
-from typing import List, Tuple, Generator
+import random
+from typing import Generator, List, Tuple
 from mazegen.cell import Cell
 from mazegen.walls import Wall
-import random
 
 
 class Maze:
@@ -62,34 +62,46 @@ class Maze:
             "1000100001",
             "1111101111",
             "0000101000",
-            "0000101111"
+            "0000101111",
         ]
         pw, ph = 10, 5
 
-        if self.width < pw + 4 or self.height < ph + 4:
+        if self.width < pw or self.height < ph:
             return
 
         pad_x = self.width - pw
         pad_y = self.height - ph
-        start_x = (pad_x // 2) + (pad_x % 2)
-        start_y = (pad_y // 2) + (pad_y % 2)
+
+        start_x = pad_x // 2
+        start_y = pad_y // 2
+
         for row_idx, row_str in enumerate(pattern):
             for col_idx, char in enumerate(row_str):
                 if char == "1":
                     gx = start_x + col_idx
                     gy = start_y + row_idx
-                    if (gx, gy) != self.entry and (gx, gy) != self.exit:
+
+                    if (
+                        self.is_valid_coord(gx, gy)
+                        and (gx, gy) != self.entry
+                        and (gx, gy) != self.exit
+                    ):
                         self.cell_at(gx, gy).is_blocked = True
 
-    def ensure_pacman_intersections(self) -> None:
-        for y in range(self.height):
-            for x in range(self.width):
-                cell = self.cell_at(x, y)
-                if not cell.is_blocked:
-                    cell.remove_wall(Wall.NORTH)
-                    cell.remove_wall(Wall.SOUTH)
-                    cell.remove_wall(Wall.EAST)
-                    cell.remove_wall(Wall.WEST)
+    def open_pacman_key_areas(self) -> None:
+        corners = [
+            (0, 0),
+            (self.width - 1, 0),
+            (0, self.height - 1),
+            (self.width - 1, self.height - 1)
+        ]
+        center = (self.width // 2, self.height // 2)
+
+        for cx, cy in corners + [center]:
+            if not self.cell_at(cx, cy).is_blocked:
+                for d, (nx, ny) in self.get_neighbor_coords(cx, cy):
+                    if not self.cell_at(nx, ny).is_blocked:
+                        self.open_passage(cx, cy, d)
 
     def add_random_loops(
         self,
@@ -98,7 +110,7 @@ class Maze:
     ) -> None:
         count = 0
         attempts = 0
-        max_attempts = 100
+        max_attempts = 200
 
         while count < extra_passages and attempts < max_attempts:
             attempts += 1
@@ -118,34 +130,41 @@ class Maze:
                     count += 1
 
     def braid(self, rng: random.Random) -> None:
-        for y in range(self.height):
-            for x in range(self.width):
+        while True:
+            dead_ends = []
+            for y in range(self.height):
+                for x in range(self.width):
+                    cell = self.cell_at(x, y)
+                    if not cell.is_blocked and cell.wall_count() == 3:
+                        dead_ends.append((x, y))
+
+            if not dead_ends:
+                break
+
+            rng.shuffle(dead_ends)
+            carve_made = False
+            for x, y in dead_ends:
                 cell = self.cell_at(x, y)
-                if cell.is_blocked:
+                if cell.wall_count() != 3:
                     continue
-                if cell.wall_count() == 3:
-                    dead_end_walls = [
-                        d for d in [
-                            Wall.NORTH,
-                            Wall.EAST,
-                            Wall.SOUTH,
-                            Wall.WEST
-                        ]
-                        if cell.has_wall(d)
-                    ]
-                    rng.shuffle(dead_end_walls)
-                    for d in dead_end_walls:
-                        for check_d, (nx, ny) in self.get_neighbor_coords(
-                            x, y
+                dead_end_walls = [
+                    d for d in [Wall.NORTH, Wall.EAST, Wall.SOUTH, Wall.WEST]
+                    if cell.has_wall(d)
+                ]
+                rng.shuffle(dead_end_walls)
+                for d in dead_end_walls:
+                    for check_d, (nx, ny) in self.get_neighbor_coords(x, y):
+                        if (
+                            check_d == d
+                            and not self.cell_at(nx, ny).is_blocked
                         ):
-                            if (
-                                check_d == d
-                                and not self.cell_at(nx, ny).is_blocked
-                            ):
-                                self.open_passage(x, y, d)
-                                break
-                        if cell.wall_count() < 3:
+                            self.open_passage(x, y, d)
+                            carve_made = True
                             break
+                    if cell.wall_count() < 3:
+                        break
+            if not carve_made:
+                break
 
     def export_hex_format(self) -> List[str]:
         lines = []
@@ -156,6 +175,6 @@ class Maze:
                 if cell.is_blocked:
                     row_hex.append("F")
                 else:
-                    row_hex.append(".")
+                    row_hex.append(f"{int(cell.walls):X}")
             lines.append("".join(row_hex))
         return lines

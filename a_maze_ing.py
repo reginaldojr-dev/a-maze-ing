@@ -1,7 +1,8 @@
+import os
 import sys
 import random
-from typing import Dict, Type, List, Optional
-from typing import Generator
+import time
+from typing import Dict, Type, List, Optional, Generator
 
 from mazegen.config import MazeConfig
 from mazegen.generator import MazeGenerator
@@ -10,6 +11,30 @@ from mazegen.algorithms.base import MazeAlgorithm
 from renderers.base import BaseRenderer
 from mazegen.maze import Maze
 from mazegen.walls import Wall
+
+
+def clean_exit() -> None:
+    """ Restores the terminal cursor (if it has been hidden in animations)"""
+    sys.stdout.write("\033[999;1H\033[?25h")
+    sys.stdout.flush()
+    print("\n[!] Execution stopped by the user..")
+
+
+def validate_terminal_size(width: int, height: int) -> None:
+    try:
+        term_size = os.get_terminal_size()
+        min_cols = width * 2 + 1
+        min_rows = height + 6
+        if term_size.columns < min_cols or term_size.lines < min_rows:
+            print(
+                f"[ERRO DE TELA] Terminal muito pequeno. "
+                f"Necessário: {min_cols}x{min_rows}, "
+                f"Atual: {term_size.columns}x{term_size.lines}",
+                file=sys.stderr
+            )
+            sys.exit(1)
+    except OSError:
+        pass
 
 
 class FallbackAlgorithm(MazeAlgorithm):
@@ -37,15 +62,19 @@ class FallbackAlgorithm(MazeAlgorithm):
 
 
 class FallbackRenderer(BaseRenderer):
-    """Displays the maze in simple hexadecimal format in the terminal."""
-    def render(self, maze: Maze, path: Optional[List[str]] = None) -> None:
-        print("\n--- [RENDERER FALLBACK - MATRIZ HEX] ---")
+    def render(
+        self,
+        maze: Maze,
+        path: Optional[List[str]] = None,
+        color_scheme: int = 0
+    ) -> None:
+        print(f"\n--- [RENDERER FALLBACK - PALETA {color_scheme}] ---")
         for line in maze.export_hex_format():
             print(line)
         if path:
             print(
-                f"\nPath Solution ({len(path)} pass): "
-                f"{' -> '.join(path)}",
+                f"\nPath Solution ({len(path)} steps): "
+                f"{''.join(path)}"
             )
         print("-----------------------------------------\n")
 
@@ -58,9 +87,7 @@ ALGORITHMS: Dict[str, Type[MazeAlgorithm]] = {
 
 RENDERERS: Dict[str, Type[BaseRenderer]] = {
     "ascii": FallbackRenderer,
-    "mlx": FallbackRenderer,
 }
-
 
 try:
     from mazegen.algorithms.backtracker import RecursiveBacktracker
@@ -86,11 +113,108 @@ try:
 except ImportError:
     pass
 
-try:
-    from renderers.mlx_renderer import MLXRenderer
-    RENDERERS["mlx"] = MLXRenderer
-except ImportError:
-    pass
+
+def save_output_file(
+    filepath: str,
+    maze: Maze,
+    entry: tuple,
+    exit_pos: tuple,
+    path: List[str]
+) -> None:
+    with open(filepath, "w", encoding="utf-8") as f:
+        for line in maze.export_hex_format():
+            f.write(line + "\n")
+        f.write("\n")
+        f.write(f"{entry[0]},{entry[1]}\n")
+        f.write(f"{exit_pos[0]},{exit_pos[1]}\n")
+        f.write("".join(path) + "\n")
+
+
+def interactive_loop(
+    config: MazeConfig,
+    renderer: BaseRenderer,
+    algorithm: MazeAlgorithm
+) -> None:
+    generator = MazeGenerator(config)
+    show_path = True
+    color_scheme = 0
+
+    maze = generator.create_maze_animated(algorithm, renderer, color_scheme)
+    path = generator.get_solution(maze)
+    save_output_file(
+        config.output_file,
+        maze,
+        config.entry,
+        config.exit,
+        path
+    )
+
+    if show_path:
+        partial_path = []
+        for step in path:
+            partial_path.append(step)
+            print("\033[H\033[J", end="")
+            renderer.render(maze, partial_path, color_scheme)
+            time.sleep(0.08)
+
+    while True:
+        print("\033[H\033[J", end="")
+        renderer.render(maze, path if show_path else None, color_scheme)
+
+        print("--- A-Maze-ing Menu ---")
+        print("1. Re-generate a new maze")
+        print("2. Show/Hide shortest path")
+        print("3. Change wall colors")
+        print("4. Quit")
+
+        try:
+            choice = input("Choice (1-4): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if choice == "1":
+            new_seed = int.from_bytes(os.urandom(4), "big")
+            config = MazeConfig(
+                width=config.width,
+                height=config.height,
+                entry=config.entry,
+                exit=config.exit,
+                output_file=config.output_file,
+                perfect=config.perfect,
+                seed=new_seed,
+                algorithm=config.algorithm,
+                display=config.display,
+                no_dead_ends=config.no_dead_ends,
+            )
+            generator = MazeGenerator(config)
+            maze = generator.create_maze_animated(
+                algorithm,
+                renderer,
+                color_scheme
+            )
+            path = generator.get_solution(maze)
+            save_output_file(
+                config.output_file,
+                maze,
+                config.entry,
+                config.exit,
+                path
+            )
+
+            if show_path:
+                partial_path = []
+                for step in path:
+                    partial_path.append(step)
+                    print("\033[H\033[J", end="")
+                    renderer.render(maze, partial_path, color_scheme)
+                    time.sleep(0.08)
+
+        elif choice == "2":
+            show_path = not show_path
+        elif choice == "3":
+            color_scheme = (color_scheme + 1) % 4
+        elif choice == "4":
+            break
 
 
 def main() -> None:
@@ -105,51 +229,27 @@ def main() -> None:
 
     try:
         config = MazeConfig.from_file(config_path)
+        validate_terminal_size(config.width, config.height)
 
         algo_cls = ALGORITHMS.get(config.algorithm)
         if not algo_cls:
             raise ConfigError(
-                f"Algoritm '{config.algorithm}' no suport."
+                f"Algorithm '{config.algorithm}' not supported."
             )
         algorithm = algo_cls()
-
-        generator = MazeGenerator(config)
-        maze = generator.create_maze(algorithm)
-
-        solution_path = generator.get_solution(maze)
-
-        hex_data = maze.export_hex_format()
-        with open(config.output_file, "w", encoding="utf-8") as f:
-            for line in hex_data:
-                f.write(line + "\n")
 
         renderer_cls = RENDERERS.get(config.display)
         if not renderer_cls:
             raise ConfigError(
-                f"Display '{config.display}' no suport."
+                f"Display '{config.display}' not supported."
             )
         renderer = renderer_cls()
 
-        def regenerate() -> tuple[Maze, List[str]]:
-            new_generator = MazeGenerator(config)
+        interactive_loop(config, renderer, algorithm)
 
-            new_algorithm = algo_cls()
-
-            new_maze = new_generator.create_maze(
-                new_algorithm
-            )
-
-            new_path = new_generator.get_solution(
-                new_maze
-            )
-
-            return new_maze, new_path
-
-        if hasattr(renderer, "set_regenerate_callback"):
-            renderer.set_regenerate_callback(regenerate)
-
-        renderer.render(maze, solution_path)
-
+    except KeyboardInterrupt:
+        clean_exit()
+        sys.exit(0)
     except ConfigError as e:
         print(f"[ERROR CONFIG] {e}", file=sys.stderr)
         sys.exit(1)
