@@ -125,6 +125,25 @@ def main() -> None:
         if not renderer_cls:
             raise ConfigError(f"Show '{config.display}' no suport.")
         renderer = renderer_cls()
+
+        def regenerate() -> tuple[Maze, List[str]]:
+            new_generator = MazeGenerator(config)
+
+            new_algorithm = algo_cls()
+
+            new_maze = new_generator.create_maze(
+                new_algorithm
+            )
+
+            new_path = new_generator.get_solution(
+                new_maze
+            )
+
+            return new_maze, new_path
+
+        if hasattr(renderer, "set_regenerate_callback"):
+            renderer.set_regenerate_callback(regenerate)
+
         renderer.render(maze, solution_path)
 
     except ConfigError as e:
