@@ -39,6 +39,8 @@ class ASCIIRenderer(BaseRenderer):
                 if cell.has_wall(Wall.SOUTH):
                     canvas[draw_y][draw_x] = "_"
 
+                    if not cell.has_wall(Wall.WEST):
+                        canvas[draw_y][draw_x - 1] = "_"
                 if cell.is_blocked:
                     canvas[draw_y][draw_x] = "#"
                 elif (x, y) == maze.entry:
