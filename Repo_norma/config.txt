@@ -6,5 +6,5 @@ OUTPUT_FILE=maze_output.hex
 PERFECT=true
 SEED=42
 ALGORITHM=prim
-DISPLAY=ascii
+DISPLAY=mlx
 NO_DEAD_ENDS=false
