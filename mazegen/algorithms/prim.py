@@ -5,12 +5,24 @@ from mazegen.maze import Maze
 
 
 class PrimAlgorithm(MazeAlgorithm):
+    """Generates a maze using randomized Prim's algorithm."""
+
     def generate(
         self,
         maze: Maze,
         rng: random.Random,
         start_pos: Tuple[int, int],
     ) -> Generator[Maze, None, None]:
+        """Carves passages by expanding a frontier list of neighboring edges.
+
+        Args:
+            maze: The Maze instance to carve passages into.
+            rng: The random number generator instance.
+            start_pos: The starting coordinate tuple (x, y) for generation.
+
+        Returns:
+            A generator yielding the Maze instance at each front expans step.
+        """
         visited = {start_pos}
         cx, cy = start_pos
         frontier = [

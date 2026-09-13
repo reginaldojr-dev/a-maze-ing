@@ -38,12 +38,24 @@ def validate_terminal_size(width: int, height: int) -> None:
 
 
 class FallbackAlgorithm(MazeAlgorithm):
+    """Provides a basic fallback algorithm that carves every available pass."""
+
     def generate(
         self,
         maze: Maze,
         rng: random.Random,
         start_pos: tuple
     ) -> Generator[Maze, None, None]:
+        """Carves straight horizontal and vertical passages sequentially.
+
+        Args:
+            maze: The Maze instance to modify.
+            rng: The random number generator instance.
+            start_pos: The starting coordinate tuple (x, y).
+
+        Returns:
+            A generator yielding the modified Maze instance.
+        """
         for y in range(maze.height):
             for x in range(maze.width):
                 cell = maze.cell_at(x, y)
@@ -62,12 +74,24 @@ class FallbackAlgorithm(MazeAlgorithm):
 
 
 class FallbackRenderer(BaseRenderer):
+    """Provides a fallback text renderer that prints hexadec maze struct."""
+
     def render(
         self,
         maze: Maze,
         path: Optional[List[str]] = None,
         color_scheme: int = 0
     ) -> None:
+        """Renders the maze as hexadec lines and displays solution step counts.
+
+        Args:
+            maze: The Maze instance to render.
+            path: An optional list of solution step strings.
+            color_scheme: An integer representing the active color palette.
+
+        Returns:
+            None
+        """
         print(f"\n--- [RENDERER FALLBACK - PALETA {color_scheme}] ---")
         for line in maze.export_hex_format():
             print(line)
@@ -121,6 +145,18 @@ def save_output_file(
     exit_pos: tuple,
     path: List[str]
 ) -> None:
+    """Saves the generat maze struct, entry, exit, and solution path to a file.
+
+    Args:
+        filepath: The destination file path where output is written.
+        maze: The Maze instance containing the grid data.
+        entry: The coordinate tuple (x, y) marking the entry point.
+        exit_pos: The coordinate tuple (x, y) marking the exit point.
+        path: A list of direction step strings representing the solution.
+
+    Returns:
+        None
+    """
     with open(filepath, "w", encoding="utf-8") as f:
         for line in maze.export_hex_format():
             f.write(line + "\n")
@@ -135,6 +171,17 @@ def interactive_loop(
     renderer: BaseRenderer,
     algorithm: MazeAlgorithm
 ) -> None:
+    """Manages the interactive terminal loop for maze generation,
+             render, and controls.
+
+    Args:
+        config: The MazeConfig instance with parameters.
+        renderer: The renderer instance used for display.
+        algorithm: The maze generation algorithm instance.
+
+    Returns:
+        None
+    """
     generator = MazeGenerator(config)
     show_path = True
     color_scheme = 0
@@ -218,6 +265,11 @@ def interactive_loop(
 
 
 def main() -> None:
+    """Executes the main entry point for the A-Maze-ing application.
+
+    Returns:
+        None
+    """
     if len(sys.argv) != 2:
         print(
             f"Use: python3 {sys.argv[0]} <path_of_config.txt>",

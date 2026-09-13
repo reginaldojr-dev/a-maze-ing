@@ -5,6 +5,8 @@ from typing import Tuple
 
 @dataclass
 class MazeConfig:
+    """Holds configuration parameters for generating and rendering the maze."""
+
     width: int
     height: int
     entry: Tuple[int, int]
@@ -17,6 +19,11 @@ class MazeConfig:
     no_dead_ends: bool
 
     def with_new_seed(self) -> "MazeConfig":
+        """Generates a new configuration instance with a randomized seed value.
+
+        Returns:
+            A new MazeConfig object with a randomized seed integer.
+        """
         return MazeConfig(
             width=self.width,
             height=self.height,
@@ -32,6 +39,14 @@ class MazeConfig:
 
     @classmethod
     def from_file(cls, filepath: str) -> "MazeConfig":
+        """Parses a config text file to build and return a MazeConfig instance.
+
+        Args:
+            filepath: The path to the configuration text file.
+
+        Returns:
+            A fully populated MazeConfig object initialized from file values.
+        """
         raw_config = {}
         with open(filepath, "r", encoding="utf-8") as f:
             for line in f:

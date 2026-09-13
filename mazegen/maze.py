@@ -5,6 +5,11 @@ from mazegen.walls import Wall
 
 
 class Maze:
+    """Represents the complete maze structure, managing the grid matrix,
+
+    walls, boundaries, special patterns, and braiding operations.
+    """
+
     def __init__(
         self,
         width: int,
@@ -12,6 +17,17 @@ class Maze:
         entry: Tuple[int, int],
         exit: Tuple[int, int]
     ):
+        """Initializes the Maze grid with dimensions, entry, and exit points.
+
+        Args:
+            width: The total number of columns in the maze.
+            height: The total number of rows in the maze.
+            entry: The coordinate tuple (x, y) marking the maze entry.
+            exit: The coordinate tuple (x, y) marking the maze exit.
+
+        Returns:
+            None
+        """
         self.width = width
         self.height = height
         self.entry = entry
@@ -21,12 +37,41 @@ class Maze:
         ]
 
     def cell_at(self, x: int, y: int) -> Cell:
+        """Retrieves the Cell instance at the specified coordinate position.
+
+        Args:
+            x: The horizontal grid index.
+            y: The vertical grid index.
+
+        Returns:
+            The Cell object located at (x, y).
+        """
         return self.grid[y][x]
 
     def is_valid_coord(self, x: int, y: int) -> bool:
+        """Checks if the given coordinate falls within the valid maze bounds.
+
+        Args:
+            x: The horizontal grid index.
+            y: The vertical grid index.
+
+        Returns:
+            True if the coordinate is inside the grid, False otherwise.
+        """
         return 0 <= x < self.width and 0 <= y < self.height
 
     def open_passage(self, x: int, y: int, direction: Wall) -> None:
+        """Removes the wall between a cell and its
+                                        neighbor in a given direction.
+
+        Args:
+            x: The horizontal grid index of the origin cell.
+            y: The vertical grid index of the origin cell.
+            direction: The Wall direction indicating the passage side.
+
+        Returns:
+            None
+        """
         dx, dy = 0, 0
         if direction == Wall.NORTH:
             dy = -1
@@ -46,6 +91,15 @@ class Maze:
         x: int,
         y: int
     ) -> Generator[Tuple[Wall, Tuple[int, int]], None, None]:
+        """Yields valid neighboring coordinates and their relative directions.
+
+        Args:
+            x: The horizontal grid index.
+            y: The vertical grid index.
+
+        Returns:
+            A generator yielding tuples of (Wall direction, (neighbor x, y)).
+        """
         directions = [
             (Wall.NORTH, (x, y - 1)),
             (Wall.EAST, (x + 1, y)),
@@ -57,6 +111,11 @@ class Maze:
                 yield direction, (nx, ny)
 
     def apply_42_pattern(self) -> None:
+        """Applies the mandatory '42' blocked structural pattern onto the grid.
+
+        Returns:
+            None
+        """
         pattern = [
             "1000101111",
             "1000100001",
@@ -89,6 +148,11 @@ class Maze:
                         self.cell_at(gx, gy).is_blocked = True
 
     def open_pacman_key_areas(self) -> None:
+        """Opens key transition areas in corners and center for Pac-Man mode.
+
+        Returns:
+            None
+        """
         corners = [
             (0, 0),
             (self.width - 1, 0),
@@ -108,6 +172,15 @@ class Maze:
         rng: random.Random,
         extra_passages: int
     ) -> None:
+        """Introduces random alternative passages to create loops in the maze.
+
+        Args:
+            rng: The random number generator instance.
+            extra_passages: The target number of extra passages to open.
+
+        Returns:
+            None
+        """
         count = 0
         attempts = 0
         max_attempts = 200
@@ -130,6 +203,14 @@ class Maze:
                     count += 1
 
     def braid(self, rng: random.Random) -> None:
+        """Iteratively removes dead-end cells to achieve a perfectly braided.
+
+        Args:
+            rng: The random number generator instance.
+
+        Returns:
+            None
+        """
         while True:
             dead_ends = []
             for y in range(self.height):
@@ -167,6 +248,11 @@ class Maze:
                 break
 
     def export_hex_format(self) -> List[str]:
+        """Encodes the maze cell walls into a sequence of hexadecimal string.
+
+        Returns:
+            A list of strings representing each row in hexadecimal format.
+        """
         lines = []
         for y in range(self.height):
             row_hex = []

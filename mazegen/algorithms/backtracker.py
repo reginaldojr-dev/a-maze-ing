@@ -6,12 +6,24 @@ from mazegen.maze import Maze
 
 
 class RecursiveBacktracker(MazeAlgorithm):
+    """Generates a maze using the random recursive backtracker algorithm."""
+
     def generate(
         self,
         maze: Maze,
         rng: random.Random,
         start_pos: Tuple[int, int],
     ) -> Generator[Maze, None, None]:
+        """Carves pass through the maze utiliz a depth-first search approach.
+
+        Args:
+            maze: The Maze instance to carve passages into.
+            rng: The random number generator instance.
+            start_pos: The starting coordinate tuple (x, y) for generation.
+
+        Returns:
+            A generator yielding the Maze instance at each carving step.
+        """
         stack = [start_pos]
         visited = {start_pos}
 

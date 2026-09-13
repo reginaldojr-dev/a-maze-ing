@@ -7,10 +7,20 @@ from mazegen.walls import Wall
 
 
 class DisjointSet:
+    """Manages disjoint sets for Kruskal's maze generation algorithm."""
+
     def __init__(
         self,
         cells: List[Tuple[int, int]]
     ) -> None:
+        """Initializes the disjoint sets with each cell as its own parent.
+
+        Args:
+            cells: A list of coordinate tuples representing valid cells.
+
+        Returns:
+            None
+        """
         self.parent: Dict[
             Tuple[int, int],
             Tuple[int, int]
@@ -22,6 +32,14 @@ class DisjointSet:
         self,
         cell: Tuple[int, int]
     ) -> Tuple[int, int]:
+        """Finds the root representative of a given cell with path compression.
+
+        Args:
+            cell: The coordinate tuple of the cell to locate.
+
+        Returns:
+            The coordinate tuple of the set's root representative.
+        """
         if self.parent[cell] != cell:
             self.parent[cell] = self.find(self.parent[cell])
         return self.parent[cell]
@@ -31,6 +49,15 @@ class DisjointSet:
         first: Tuple[int, int],
         second: Tuple[int, int]
     ) -> None:
+        """Merges the sets containing the two specified cells.
+
+        Args:
+            first: The coordinate tuple of the first cell.
+            second: The coordinate tuple of the second cell.
+
+        Returns:
+            None
+        """
         root_first = self.find(first)
         root_second = self.find(second)
 
@@ -39,12 +66,24 @@ class DisjointSet:
 
 
 class KruskalAlgorithm(MazeAlgorithm):
+    """Generates a maze using random Kruskal's algorithm with disjoint sets."""
+
     def generate(
         self,
         maze: Maze,
         rng: random.Random,
         start_pos: Tuple[int, int]
     ) -> Generator[Maze, None, None]:
+        """Generates passages through randomized edge processing.
+
+        Args:
+            maze: The Maze instance to carve passages into.
+            rng: The random number generator instance.
+            start_pos: The starting coordinate tuple (unused in Kruskal).
+
+        Returns:
+            A generator yielding the Maze instance after each step.
+        """
         _ = start_pos
 
         cells = [

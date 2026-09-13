@@ -6,12 +6,28 @@ from renderers.base import BaseRenderer
 
 
 class ASCIIRenderer(BaseRenderer):
+    """Renders the maze and solution path in the terminal using ASCII char
+
+    and ANSI color codes.
+    """
+
     def render(
         self,
         maze: Maze,
         path: Optional[List[str]] = None,
         color_scheme: int = 0
     ) -> None:
+        """Render the maze grid, entry, exit, walls, and option solution path.
+
+        Args:
+            maze: The Maze instance to render.
+            path: An optional list of direction steps representing the
+                solution path.
+            color_scheme: An integer code selecting the active color palette.
+
+        Returns:
+            None
+        """
 
         COLOR_SCHEMES = {
             0: {

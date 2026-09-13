@@ -9,6 +9,16 @@ def solve_bfs(
     start: Tuple[int, int],
     end: Tuple[int, int],
 ) -> List[str]:
+    """Finds the shortest path between start and end coordinates using BFS.
+
+    Args:
+        maze: The Maze instance to solve.
+        start: The starting coordinate tuple (x, y).
+        end: The target ending coordinate tuple (x, y).
+
+    Returns:
+        A list of direction character strings representing the solution path.
+    """
     queue = deque([start])
     visited = {start}
     parent: Dict[Tuple[int, int], Tuple[Tuple[int, int], str]] = {}
